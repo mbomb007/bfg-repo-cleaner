@@ -59,8 +59,6 @@ object Main extends App {
 
             RepoRewriter.rewrite(repo, config.objectIdCleanerConfig)
             repo.close()
-
-            println(dontGiveUp())
           }
         }
     }
