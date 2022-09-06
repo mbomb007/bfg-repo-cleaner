@@ -7,12 +7,14 @@ import org.eclipse.jgit.lib.Constants.OBJ_BLOB
 import org.eclipse.jgit.lib.{ObjectId, ObjectReader, Repository}
 import org.eclipse.jgit.revwalk.{RevCommit, RevTree}
 import org.eclipse.jgit.treewalk.TreeWalk
+import org.scalatest.Inspectors
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.{MatchResult, Matcher}
-import org.scalatest.{FlatSpec, Inspectors, Matchers}
 
-import scala.collection.convert.ImplicitConversionsToScala._
+import scala.jdk.CollectionConverters._
 
-class unpackedRepo(filePath: String) extends FlatSpec with Matchers {
+class unpackedRepo(filePath: String) extends AnyFlatSpec with Matchers {
 
   implicit val repo = unpackRepo(filePath)
   implicit val objectDirectory = repo.getObjectDatabase.asInstanceOf[ObjectDirectory]
@@ -64,9 +66,9 @@ class unpackedRepo(filePath: String) extends FlatSpec with Matchers {
   def commitHist(specificRefs: String*)(implicit repo: Repository): Seq[RevCommit] = {
     val logCommand = repo.git.log
     if (specificRefs.isEmpty) logCommand.all else specificRefs.foldLeft(logCommand)((lc, ref) => lc.add(repo.resolve(ref)))
-  }.call.toSeq.reverse
+  }.call.asScala.toSeq.reverse
 
-  def haveCommitWhereObjectIds(boom: Matcher[Traversable[ObjectId]])(implicit reader: ObjectReader): Matcher[RevCommit] = boom compose {
+  def haveCommitWhereObjectIds(boom: Matcher[Iterable[ObjectId]])(implicit reader: ObjectReader): Matcher[RevCommit] = boom compose {
     (c: RevCommit) => c.getTree.walk().map(_.getObjectId(0)).toSeq
   }
 
@@ -82,7 +84,7 @@ class unpackedRepo(filePath: String) extends FlatSpec with Matchers {
     r: Repository => commitHist(refs:_*)(r)
   }
 
-  def ensureRemovalOfBadEggs[S,T](expr : => Traversable[S], exprResultMatcher: Matcher[Traversable[S]])(block: => T) = {
+  def ensureRemovalOfBadEggs[S,T](expr : => Iterable[S], exprResultMatcher: Matcher[Iterable[S]])(block: => T) = {
     gc()
     expr should exprResultMatcher
 

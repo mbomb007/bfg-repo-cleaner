@@ -1,11 +1,9 @@
 import Dependencies._
 import common._
-import Defaults._
-import com.typesafe.sbt.pgp.PgpKeys._
 
 organization in ThisBuild := "com.madgag"
 
-scalaVersion in ThisBuild := "2.12.4"
+scalaVersion in ThisBuild := "2.13.4"
 
 scalacOptions in ThisBuild ++= Seq("-deprecation", "-feature", "-language:postfixOps")
 
@@ -15,28 +13,21 @@ homepage in ThisBuild := Some(url("https://github.com/rtyley/bfg-repo-cleaner"))
 
 resolvers in ThisBuild ++= jgitVersionOverride.map(_ => Resolver.mavenLocal).toSeq
 
-libraryDependencies in ThisBuild += scalatest % "test"
+libraryDependencies in ThisBuild += scalatest % Test
 
 lazy val root = Project(id = "bfg-parent", base = file(".")) aggregate (bfg, bfgTest, bfgLibrary)
 
 releaseSignedArtifactsSettings
 
-publishSigned := {}
-
 lazy val bfgTest = bfgProject("bfg-test")
 
-lazy val bfgLibrary = bfgProject("bfg-library") dependsOn(bfgTest % "test")
+lazy val bfgLibrary = bfgProject("bfg-library") dependsOn(bfgTest % Test)
 
-lazy val bfg = bfgProject("bfg") enablePlugins(BuildInfoPlugin) dependsOn(bfgLibrary, bfgTest % "test")
+lazy val bfg = bfgProject("bfg") enablePlugins(BuildInfoPlugin) dependsOn(bfgLibrary, bfgTest % Test)
 
 lazy val bfgBenchmark = bfgProject("bfg-benchmark")
 
-publishMavenStyle in ThisBuild := true
-
-publishTo in ThisBuild :=
-  Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
-
-pomIncludeRepository in ThisBuild := { _ => false }
+publishTo in ThisBuild := sonatypePublishToBundle.value
 
 pomExtra in ThisBuild := (
   <scm>

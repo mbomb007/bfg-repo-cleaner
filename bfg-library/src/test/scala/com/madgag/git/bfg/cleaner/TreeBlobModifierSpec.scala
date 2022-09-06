@@ -25,11 +25,12 @@ import com.madgag.git.bfg.cleaner.ObjectIdSubstitutor._
 import com.madgag.git.bfg.cleaner.protection.ProtectedObjectCensus
 import com.madgag.git.bfg.model.TreeBlobEntry
 import com.madgag.git.test._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-import scala.collection.convert.ImplicitConversionsToScala._
+import scala.jdk.CollectionConverters._
 
-class TreeBlobModifierSpec extends FlatSpec with Matchers {
+class TreeBlobModifierSpec extends AnyFlatSpec with Matchers {
 
   "TreeBlobModifier" should "only clean a given tree entry once" in {
     class CountingTreeBlobModifier extends TreeBlobModifier {
@@ -47,7 +48,7 @@ class TreeBlobModifierSpec extends FlatSpec with Matchers {
 
     RepoRewriter.rewrite(repo, ObjectIdCleaner.Config(ProtectedObjectCensus(Set("HEAD")), OldIdsPublic, treeBlobsCleaners = Seq(countingTreeBlobModifier)))
 
-    val endCounts = countingTreeBlobModifier.counts.asMap().toMap
+    val endCounts = countingTreeBlobModifier.counts.asMap().asScala.toMap
 
     endCounts.size should be >= 4
     all (endCounts.values) shouldBe 1

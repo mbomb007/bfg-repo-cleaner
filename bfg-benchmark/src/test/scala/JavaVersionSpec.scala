@@ -1,6 +1,8 @@
-import org.scalatest.{FlatSpec, Matchers, OptionValues}
+import org.scalatest.OptionValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-object JavaVersionSpec extends FlatSpec with OptionValues with Matchers {
+object JavaVersionSpec extends AnyFlatSpec with OptionValues with Matchers {
   "version" should "parse an example line" in {
     JavaVersion.versionFrom("""java version "1.7.0_51"""").value shouldBe "1.7.0_51"
   }
